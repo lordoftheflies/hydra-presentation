@@ -16,6 +16,7 @@ class Command(BaseCommand):
     POLYMER_BULD_DIRECTORYNAME = 'build'
     POLYMER_SRC_DIRECTORYNAME = 'src'
 
+    POLYMER_CONFIGURATION_FILENAME = 'polymer.json'
     BOWER_CONFIGURATION_FILENAME = 'bower.json'
     BOWER_COMPONENTS_DIRECTORYNAME = 'bower_components'
 
@@ -80,19 +81,42 @@ class Command(BaseCommand):
             '--compile',
             action = 'store_true',
             dest='compile',
+            default=False,
             help='Switch to compile'
         )
 
+    def label_dict(self, options: dict, **kwargs):
+        return {kwargs[k]: options[k] for k in kwargs}
+
     def handle(self, *args, **options):
+        print(args)
+        print(options)
+
+        self.stdout.write(self.style.WARNING('Django Polymer build'))
+        self.stdout.write(self.style.WARNING(json.dumps(
+            self.label_dict(
+                options=options,
+
+                command='Polymer CLI command',
+                src='Polymer project home',
+                distro='Build type',
+                app='Django module',
+                compile='Compile source',
+
+            ),
+            sort_keys=True,
+            indent=4
+        )))
+
         self.source_directory = options['src']
         self.python_module = options['app']
         self.polymer_distro = options['distro']
         self.compile = options['compile']
 
-        self.stdout.write(self.style.WARNING('Django Polymer'))
-        self.stdout.write('Polymer source directory: %s' % self.source_directory)
-        self.stdout.write('Polymer distribution: %s' % self.polymer_distro)
-        self.stdout.write('Django module name: %s' % self.python_module)
+        # self.stdout.write(self.style.WARNING('Django Polymer'))
+        # self.stdout.write('Polymer source directory: %s' % self.source_directory)
+        # self.stdout.write('Polymer distribution: %s' % self.polymer_distro)
+        # self.stdout.write('Django module name: %s' % self.python_module)
         # if self.check_configurations() is False:
         #     raise ValueError('Bower - incompatible components')
 
@@ -104,12 +128,17 @@ class Command(BaseCommand):
         #     'Erase static directory in module[%s]: %s' % (self.python_module, self.module_static_directory)))
         # shutil.rmtree(path=self.module_static_directory)
         # self.build_cleanup()
+
+
         if self.compile:
             self.build()
             self.copy_static_resources_from_build()
 
-            self.build_cleanup()
+
         else:
+            if os.path.exists(self.polymer_build_path):
+                self.build_cleanup()
+
             self.copy_static_resources_from_source()
 
         self.remove_module_static_bower()
@@ -125,8 +154,8 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS('Successfully installed  "%(name)s#%(version)s"' % self.bower_configuration))
 
-    def load_bower_json(self, path):
-        with open(os.path.join(path, self.BOWER_CONFIGURATION_FILENAME)) as f:
+    def load_bower_json(self, *args):
+        with open(os.path.join(*args)) as f:
             bower_configuration = json.load(f)
         return bower_configuration
 
@@ -137,8 +166,14 @@ class Command(BaseCommand):
     @property
     def bower_configuration(self):
         if self._bower_configuration is None:
-            self._bower_configuration = self.load_bower_json(path=self.source_directory)
+            self._bower_configuration = self.load_bower_json(self.source_directory, self.BOWER_CONFIGURATION_FILENAME)
         return self._bower_configuration
+
+    @property
+    def polymer_configuration(self):
+        if self._polymer_configuration is None:
+            self._polymer_configuration = self.load_bower_json(self.source_directory, self.POLYMER_CONFIGURATION_FILENAME)
+        return self._polymer_configuration
 
     @property
     def module_static_directory(self):
@@ -230,7 +265,7 @@ class Command(BaseCommand):
         return set(already_installed_apps) == set(currently_deployed_apps)
 
     def process_directories_reqursively(self, path, path_from, path_to):
-        self.stdout.write('* %s -> %s in %s' % (path_from, path_to, path))
+        self.stdout.write('* %s -> %s in %s' % (path_from, path_to, pathlib.Path(path).relative_to(self.module_static_directory)))
 
         if os.path.isfile(path):
             self.replace_link_of_bower_components(
