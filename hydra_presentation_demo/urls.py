@@ -17,15 +17,22 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
+from rest_framework_swagger.views import get_swagger_view
+
+allauth_schema_view = get_swagger_view(title='Allauth API')
+
 
 urlpatterns = [
+
+
     path('admin/', admin.site.urls),
 
     url(r'^account/', include('allauth.urls')),
-    url(r'^accounts/profile/$', RedirectView.as_view(url='/', permanent=True), name='profile-redirect'),
+    # url(r'^accounts/profile/$', RedirectView.as_view(url='/', permanent=True), name='profile-redirect'),
     url(r'^rest-auth/', include('rest_auth.urls')),
-    url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
+    # url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
 
+    url(r'^api/allauth/$', allauth_schema_view),
 
     path(r'', include('hydra_presentation.urls')),
 ]

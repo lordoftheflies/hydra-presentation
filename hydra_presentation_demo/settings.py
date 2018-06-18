@@ -58,6 +58,8 @@ class BaseConfiguration(Configuration):
         # 'rest_auth.registration',
 
         'rest_framework',
+        'rest_framework_swagger',
+
         # 'rest_framework.authtoken',
 
         'djangobower',
@@ -190,6 +192,14 @@ class BaseConfiguration(Configuration):
             },
         },
     }
+
+    AUTHENTICATION_BACKENDS = (
+        # Needed to login by username in Django admin, regardless of `allauth`
+        'django.contrib.auth.backends.ModelBackend',
+
+        # `allauth` specific authentication methods, such as login by e-mail
+        'allauth.account.auth_backends.AuthenticationBackend',
+    )
 
 class PolymerConfiguration(object):
     BOWER_COMPONENTS_ROOT = os.path.join(BaseConfiguration.BASE_DIR, 'components')
