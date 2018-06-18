@@ -14,9 +14,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.views.generic import TemplateView, RedirectView
+from django.views.static import serve
+
+from hydra_presentation.views import index
 
 urlpatterns = [
-    path(settings.POLYMER_APPLICATION_ROOT, admin.site.urls),
+    url(r'^service-worker.js$', serve, kwargs={
+        'path': 'service-worker.js'
+    }, name='service-worker'),
+
+    url(r'^src/(?P<path>/.html)$', serve),
+
+    url(r'^.*$', TemplateView.as_view(template_name="hydra_presentation/spa.html"), name='index'),
+
+
+
+    # path(settings.POLYMER_APPLICATION_ROOT, admin.site.urls),
 ]

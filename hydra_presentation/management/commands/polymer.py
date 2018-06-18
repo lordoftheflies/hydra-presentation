@@ -79,7 +79,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--compile',
-            action = 'store_true',
+            action='store_true',
             dest='compile',
             default=False,
             help='Switch to compile'
@@ -129,7 +129,6 @@ class Command(BaseCommand):
         # shutil.rmtree(path=self.module_static_directory)
         # self.build_cleanup()
 
-
         if self.compile:
             self.build()
             self.copy_static_resources_from_build()
@@ -146,8 +145,6 @@ class Command(BaseCommand):
         # pathlib.Path(self.module_static_path).mkdir(parents=True, exist_ok=True)
         # # Create module specific template directory
         # pathlib.Path(self.module_template_path).mkdir(parents=True, exist_ok=True)
-
-
 
         self.django_bower_monkey_patch()
 
@@ -172,7 +169,8 @@ class Command(BaseCommand):
     @property
     def polymer_configuration(self):
         if self._polymer_configuration is None:
-            self._polymer_configuration = self.load_bower_json(self.source_directory, self.POLYMER_CONFIGURATION_FILENAME)
+            self._polymer_configuration = self.load_bower_json(self.source_directory,
+                                                               self.POLYMER_CONFIGURATION_FILENAME)
         return self._polymer_configuration
 
     @property
@@ -211,7 +209,8 @@ class Command(BaseCommand):
 
     def build(self):
         # Build Polymer application
-        self.stdout.write('Polymer %s %s#%s ...' % (self.POLYMER_CLI_COMMAND_BUILD, self.bower_configuration['name'], self.bower_configuration['version']))
+        self.stdout.write('Polymer %s %s#%s ...' % (
+            self.POLYMER_CLI_COMMAND_BUILD, self.bower_configuration['name'], self.bower_configuration['version']))
         self.call_bash_script(command=self.POLYMER_CLI_COMMAND_BUILD)
 
     def copy_static_resources_from_build(self):
@@ -265,7 +264,6 @@ class Command(BaseCommand):
         return set(already_installed_apps) == set(currently_deployed_apps)
 
     def process_directories_reqursively(self, path, path_from, path_to):
-        self.stdout.write('* %s -> %s in %s' % (path_from, path_to, pathlib.Path(path).relative_to(self.module_static_directory)))
 
         if os.path.isfile(path):
             self.replace_link_of_bower_components(
@@ -290,15 +288,21 @@ class Command(BaseCommand):
         # self.stdout.writelines(res.splitlines())
 
     def replace_link_of_bower_components(self, filepath, path_from, path_to):
-        if pathlib.Path(filepath).suffix == 'html':
+        if pathlib.Path(filepath).suffix == '.html':
+            self.stdout.write('* %s -> %s in %s' % (
+                path_from,
+                path_to,
+                pathlib.Path(filepath).relative_to(self.module_static_directory)
+            ))
 
-            with open(filepath, 'r') as file:
-                filedata = file.read()
+            fileInput = open(filepath, 'r')
+            filedata = fileInput.read()
+            fileInput.close()
 
             # Replace the target string
             filedata = filedata.replace(path_from, path_to)
 
             # Write the file out again
-            with open(filepath, 'w') as file:
-                file.write(filedata)
-
+            fileOutput = open(filepath, 'w')
+            fileOutput.write(filedata)
+            fileOutput.close()

@@ -28,17 +28,40 @@ class BaseConfiguration(Configuration):
 
     ALLOWED_HOSTS = ['*']
 
+    SITE_ID = 1
+
     # Application definition
 
     INSTALLED_APPS = [
         'django.contrib.admin',
+        'django.contrib.sites',
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
+
+        'corsheaders',
+
+        'allauth',
+        'allauth.account',
+        'allauth.socialaccount',
+
+        'allauth.socialaccount.providers.facebook',
+        'allauth.socialaccount.providers.bitbucket',
+        'allauth.socialaccount.providers.github',
+        'allauth.socialaccount.providers.gitlab',
+        'allauth.socialaccount.providers.google',
+        'allauth.socialaccount.providers.slack',
+
+        # 'rest_auth',
+        # 'rest_auth.registration',
+
         'rest_framework',
+        # 'rest_framework.authtoken',
+
         'djangobower',
+
         'hydra_presentation.apps.HydraPresentationConfig'
     ]
 
@@ -117,11 +140,11 @@ class BaseConfiguration(Configuration):
     # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
     STATIC_URL = '/static/'
-    # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     # Add it on your settings.py file
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, "static"),  # your static/ files folder
-    ]
+    # STATICFILES_DIRS = [
+    #     os.path.join(BASE_DIR, "static"),  # your static/ files folder
+    # ]
     STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
