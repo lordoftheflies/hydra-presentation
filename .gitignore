@@ -109,3 +109,4 @@ venv.bak/
 **/static/test
 **/static/build
 static/
+components/
