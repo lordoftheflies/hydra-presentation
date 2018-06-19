@@ -15,22 +15,19 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls import url
-from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import TemplateView, RedirectView
+from django.urls import path
+from django.views.generic import TemplateView
 from django.views.static import serve
-
-from hydra_presentation.views import index
 
 urlpatterns = [
     url(r'^service-worker.js$', serve, kwargs={
-        'path': 'service-worker.js'
+        'path': 'service-worker.js',
+        'document_root': settings.STATIC_ROOT
     }, name='service-worker'),
-
-    url(r'^src/(?P<path>/.html)$', serve),
 
     url(r'^.*$', TemplateView.as_view(template_name="hydra_presentation/spa.html"), name='index'),
 
+    url(r'^src/(?P<path>/.html)$', serve),
 
 
     # path(settings.POLYMER_APPLICATION_ROOT, admin.site.urls),

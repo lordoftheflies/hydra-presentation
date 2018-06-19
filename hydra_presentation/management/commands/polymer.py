@@ -221,7 +221,7 @@ class Command(BaseCommand):
         self.stdout.write('Copy built distribution: %s -> %s' % (self.polymer_build_path, self.module_static_directory))
         shutil.copytree(
             src=self.polymer_build_path,
-            dst=self.module_static_directory
+            dst=self.module_static_directory,
         )
 
     def copy_static_resources_from_source(self):
@@ -232,7 +232,8 @@ class Command(BaseCommand):
         self.stdout.write('Copy sources: %s -> %s' % (self.polymer_build_path, self.module_static_directory))
         shutil.copytree(
             src=self.polymer_path,
-            dst=self.module_static_directory
+            dst=self.module_static_directory,
+            ignore = shutil.ignore_patterns('build', 'test', 'index.html')
         )
 
     def remove_module_static_bower(self):
@@ -245,14 +246,14 @@ class Command(BaseCommand):
         self.process_directories_reqursively(
             path=self.module_static_directory,
             path_from='bower_components/',
-            path_to='./'
+            path_to=''
         )
 
         # Static components of <polymer-app>/src
         self.process_directories_reqursively(
             path=self.module_static_src_path,
-            path_from='../bower_components/',
-            path_to='../'
+            path_from='bower_components/',
+            path_to=''
         )
 
     def check_configurations(self):

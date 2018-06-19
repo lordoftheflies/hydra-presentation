@@ -47,12 +47,12 @@ class BaseConfiguration(Configuration):
         'allauth.account',
         'allauth.socialaccount',
 
-        'allauth.socialaccount.providers.facebook',
-        'allauth.socialaccount.providers.bitbucket',
-        'allauth.socialaccount.providers.github',
-        'allauth.socialaccount.providers.gitlab',
-        'allauth.socialaccount.providers.google',
-        'allauth.socialaccount.providers.slack',
+        # 'allauth.socialaccount.providers.facebook',
+        # 'allauth.socialaccount.providers.bitbucket',
+        # 'allauth.socialaccount.providers.github',
+        # 'allauth.socialaccount.providers.gitlab',
+        # 'allauth.socialaccount.providers.google',
+        # 'allauth.socialaccount.providers.slack',
 
         # 'rest_auth',
         # 'rest_auth.registration',

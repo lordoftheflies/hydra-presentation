@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from rest_framework_swagger.views import get_swagger_view
 
-allauth_schema_view = get_swagger_view(title='Allauth API')
+allauth_schema_view = get_swagger_view(title='Allauth API', url=r'/account/')
 
 
 urlpatterns = [
@@ -34,5 +34,6 @@ urlpatterns = [
 
     url(r'^api/allauth/$', allauth_schema_view),
 
-    path(r'', include('hydra_presentation.urls')),
+    path(r'my-app/', include('hydra_presentation.urls')),
+    # url(r'', RedirectView.as_view(url='my-app/', permanent=True), name='home'),
 ]
