@@ -123,3 +123,10 @@ application. Each new demand-loaded fragment should be added to the list of
 `fragments` in the included `polymer.json` file. This will ensure those
 components and their dependencies are added to the list of pre-cached components
 and will be included in the build.
+## Install 
+ 
+npm install -g json-server
+
+## Start development server 
+
+json-server --watch db.json

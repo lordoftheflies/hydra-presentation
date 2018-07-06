@@ -1,3 +1,5 @@
+{% load static %}
+
 <!--
 @license
 Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
@@ -8,24 +10,25 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../app-layout/app-drawer/app-drawer.html">
-<link rel="import" href="../app-layout/app-drawer-layout/app-drawer-layout.html">
-<link rel="import" href="../app-layout/app-header/app-header.html">
-<link rel="import" href="../app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="../app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../app-route/app-location.html">
-<link rel="import" href="../app-route/app-route.html">
-<link rel="import" href="../brum-global-variable/brum-global-variable.html">
-<link rel="import" href="../iron-ajax/iron-ajax.html">
-<link rel="import" href="../iron-list/iron-list.html">
-<link rel="import" href="../iron-localstorage/iron-localstorage.html">
-<link rel="import" href="../iron-pages/iron-pages.html">
-<link rel="import" href="../iron-selector/iron-selector.html">
-<link rel="import" href="../paper-fab/paper-fab.html">
-<link rel="import" href="../paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="{% static 'polymer/polymer-element.html' %}">
+<link rel="import" href="{% static 'app-layout/app-drawer/app-drawer.html' %}">
+<link rel="import" href="{% static 'app-layout/app-drawer-layout/app-drawer-layout.html' %}">
+<link rel="import" href="{% static 'app-layout/app-header/app-header.html' %}">
+<link rel="import" href="{% static 'app-layout/app-header-layout/app-header-layout.html' %}">
+<link rel="import" href="{% static 'app-layout/app-scroll-effects/app-scroll-effects.html' %}">
+<link rel="import" href="{% static 'app-layout/app-toolbar/app-toolbar.html' %}">
+<link rel="import" href="{% static 'app-route/app-location.html' %}">
+<link rel="import" href="{% static 'app-route/app-route.html' %}">
+<link rel="import" href="{% static 'brum-global-variable/brum-global-variable.html' %}">
+<link rel="import" href="{% static 'iron-ajax/iron-ajax.html' %}">
+<link rel="import" href="{% static 'iron-list/iron-list.html' %}">
+<link rel="import" href="{% static 'iron-localstorage/iron-localstorage.html' %}">
+<link rel="import" href="{% static 'iron-pages/iron-pages.html' %}">
+<link rel="import" href="{% static 'iron-selector/iron-selector.html' %}">
+<link rel="import" href="{% static 'paper-fab/paper-fab.html' %}">
+<link rel="import" href="{% static 'paper-icon-button/paper-icon-button.html' %}">
+<link rel="import" href="{% static 'paper-toast/paper-toast.html' %}">
+
 <link rel="import" href="my-icons.html">
 <link rel="import" href="plutonium-allauth-authentication.html">
 <link rel="import" href="my-application-info.html">
@@ -44,6 +47,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-view2.html">
 <link rel="lazy-import" href="my-view3.html">
 <link rel="lazy-import" href="my-view404.html">
+
+{% block header %}
+{% endblock header %}
+
 
 <dom-module id="my-app">
     <template>
@@ -134,6 +141,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 max-height: 50vh;
             }
 
+
+            {% block header %}
+            {% endblock header %}
+
         </style>
 
         <my-allauth-login
@@ -192,6 +203,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </my-forgotten-password>
                     <my-view404 name="view404"></my-view404>
 
+
+                    {% block public_pages %}
+                    {% endblock public_pages %}
                 </iron-pages>
 
 
@@ -214,6 +228,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <a name="view2" href="[[rootPath]]view2">View Two</a>
                         <a name="view3" href="[[rootPath]]view3">View Three</a>
                         <a name="components-demo" href="[[rootPath]]components-demo">Components</a>
+
+                        {% block main_menu %}
+                        {% endblock main_menu %}
+
                     </iron-selector>
                 </app-drawer>
 
@@ -243,6 +261,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <my-components-demo
                                 name="components-demo">
                         </my-components-demo>
+
+                        {% block private_pages %}
+                        {% endblock private_pages %}
+
                     </iron-pages>
 
 

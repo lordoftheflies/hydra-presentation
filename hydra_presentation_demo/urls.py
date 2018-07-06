@@ -35,5 +35,5 @@ urlpatterns = [
     url(r'^api/allauth/$', allauth_schema_view),
 
     path(r'my-app/', include('hydra_presentation.urls')),
-    # url(r'', RedirectView.as_view(url='my-app/', permanent=True), name='home'),
+    url(r'', RedirectView.as_view(url='my-app/', permanent=True), name='home'),
 ]
