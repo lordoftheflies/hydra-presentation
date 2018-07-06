@@ -47,17 +47,19 @@ class BaseConfiguration(Configuration):
         'allauth.account',
         'allauth.socialaccount',
 
-        'allauth.socialaccount.providers.facebook',
-        'allauth.socialaccount.providers.bitbucket',
-        'allauth.socialaccount.providers.github',
-        'allauth.socialaccount.providers.gitlab',
-        'allauth.socialaccount.providers.google',
-        'allauth.socialaccount.providers.slack',
+        # 'allauth.socialaccount.providers.facebook',
+        # 'allauth.socialaccount.providers.bitbucket',
+        # 'allauth.socialaccount.providers.github',
+        # 'allauth.socialaccount.providers.gitlab',
+        # 'allauth.socialaccount.providers.google',
+        # 'allauth.socialaccount.providers.slack',
 
         # 'rest_auth',
         # 'rest_auth.registration',
 
         'rest_framework',
+        'rest_framework_swagger',
+
         # 'rest_framework.authtoken',
 
         'djangobower',
@@ -89,6 +91,9 @@ class BaseConfiguration(Configuration):
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                 ],
+                'libraries': {
+
+                }
             },
         },
     ]
@@ -191,20 +196,31 @@ class BaseConfiguration(Configuration):
         },
     }
 
+    AUTHENTICATION_BACKENDS = (
+        # Needed to login by username in Django admin, regardless of `allauth`
+        'django.contrib.auth.backends.ModelBackend',
+
+        # `allauth` specific authentication methods, such as login by e-mail
+        'allauth.account.auth_backends.AuthenticationBackend',
+    )
+
 class PolymerConfiguration(object):
     BOWER_COMPONENTS_ROOT = os.path.join(BaseConfiguration.BASE_DIR, 'components')
 
     BOWER_INSTALLED_APPS = [
         "PolymerElements/app-layout#^2.0.0",
         "PolymerElements/app-route#^2.0.0",
+        "SieBrum/brum-global-variable#^1.0.6",
         "PolymerElements/iron-ajax#^2.1.3",
         "PolymerElements/iron-flex-layout#^2.0.0",
         "PolymerElements/iron-collapse#^2.0.0",
+        "PolymerElements/iron-form#^2.3.0",
         "PolymerElements/iron-iconset-svg#^2.0.0",
         "PolymerElements/iron-icon",
         "PolymerElements/iron-image#^2.2.0",
         "PolymerElements/iron-input#^2.1.1",
         "PolymerElements/iron-list#^2.0.14",
+        "PolymerElements/iron-localstorage#^2.1.1",
         "PolymerElements/iron-media-query#^2.0.0",
         "PolymerElements/iron-pages#^2.0.0",
         "PolymerElements/iron-selector#^2.0.0",
@@ -226,6 +242,7 @@ class PolymerConfiguration(object):
         "PolymerElements/paper-tabs#^2.0.0",
         "PolymerElements/paper-toast#^2.1.0",
         "Polymer/polymer#^2.0.0",
+        "SieBrum/brum-global-variable#^1.0.6",
         "webcomponents/webcomponentsjs#^1.0.0",
         "web-animations-js#^2.3.1",
         "socket.io-client#^2.0.1",
