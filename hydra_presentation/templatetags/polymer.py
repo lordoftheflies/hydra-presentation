@@ -1,4 +1,6 @@
+import logging
 import re
+import traceback
 
 from django import template
 from django.template.defaultfilters import stringfilter
@@ -6,34 +8,53 @@ from django.utils.safestring import mark_safe
 
 from hydra_presentation import polymer
 
+logger = logging.getLogger(__name__)
+
 register = template.Library()
 
 
 @register.filter
 @stringfilter
 def camel_case(value: str):
-    """Converts a string into camel-case"""
+    """Converts a string into CamelCase"""
+    try:
+        if value[0].islower() and '-' in value:
+            result = re.sub('-([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
+        else:
+            # else:
+            #     # return re.sub('_([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
+            #     return re.sub('_([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
 
-    if value[0].islower() and '-' in value:
-        return re.sub('-([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
-    else:
-        # else:
-        #     # return re.sub('_([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
-        #     return re.sub('_([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
+            result = re.sub('_([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
 
-        return re.sub('_([A-Za-z])', lambda match: match.group(1).upper(), value[0].upper() + value[1:])
+        logger.debug('%s -> %s' % (value, result))
+    except BaseException as e:
+        logger.warning(str(e))
+        traceback.print_exc()
+    finally:
+        return result
 
 
 @register.filter
 @stringfilter
 def polymer_case(value: str):
-    """Converts a string into camelcase"""
-    if '-' in value and value[0].islower():  # polymer-case
-        return value.lower()
-    elif '_' in value and value[0].islower():  # python_case
-        return re.sub('_([A-Za-z])', lambda match: '-' + match.group(1).lower(), value[0].lower() + value[1:]).lower()
-    else:  # CamelCase
-        return re.sub('([A-Z])', lambda match: '-' + match.group(1).lower(), value[0].lower() + value)[2:]
+    """Converts a string into polymer-case"""
+    result = value
+    try:
+        if '-' in value and value[0].islower():  # polymer-case
+            result = value.lower()
+        elif '_' in value and value[0].islower():  # python_case
+            result = re.sub('_([A-Za-z])', lambda match: '-' + match.group(1).lower(),
+                            value[0].lower() + value[1:]).lower()
+        else:  # CamelCase
+            result = re.sub('([A-Z])', lambda match: '-' + match.group(1).lower(), value[0].lower() + value)[2:]
+
+        logger.debug('%s -> %s' % (value, result))
+    except BaseException as e:
+        logger.warning(str(e))
+        traceback.print_exc()
+    finally:
+        return result
 
 
 @register.filter
@@ -62,7 +83,10 @@ def base(module: polymer.Module):
 def tag(tag: polymer.Tag):
     return mark_safe('<%s %s>%s</%s>' % (
         tag.name,
-        ' '.join([(('%s="%s"' % (polymer_case(key), str(value).lower() if isinstance(value, bool) else value)) if value is not None else key) for key, value in tag.attributes.items()]),
+        ' '.join([(('%s="%s"' % (
+            str(key).lower(), str(value).lower() if isinstance(value, bool) else value)) if value is not None else key)
+                  for
+                  key, value in tag.attributes.items()]),
         '',
         tag.name
     ))

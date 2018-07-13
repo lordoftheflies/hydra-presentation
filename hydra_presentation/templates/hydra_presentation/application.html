@@ -1,4 +1,4 @@
-{% extends "hydra_presentation/polymer_base.html" %}
+{% extends "hydra_presentation/dom_module.html" %}
 
 {% load static %}
 {% load polymer %}
@@ -20,7 +20,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="my-icons.html">
 {% endblock icons %}
 
-
 {% block components %}
 
 <link rel="import" href="{% static 'app-layout/app-drawer/app-drawer.html' %}">
@@ -41,11 +40,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="{% static 'paper-icon-button/paper-icon-button.html' %}">
 <link rel="import" href="{% static 'paper-toast/paper-toast.html' %}">
 
-{% for component in application.components %}
+{% for component in module.components %}
 {% link component %}
 {% endfor %}
 
-{% for page in application.pages %}
+{% for route, page in module.pages.items %}
 {% link page %}
 {% endfor %}
 
@@ -145,6 +144,8 @@ max-height: 50vh;
 {% endblock style %}
 
 {% block content %}
+
+{% verbatim %}
 <plutonium-allauth-authentication
         id="auth"
         authenticated="{{authenticated}}"
@@ -207,6 +208,10 @@ max-height: 50vh;
     </app-header-layout>
 </div>
 
+
+{% endverbatim %}
+
+{% verbatim %}
 <div hidden$="[[!authenticated]]">
     <app-drawer-layout id="secureLayout" fullbleed narrow="{{narrow}}">
         <!-- Drawer content -->
@@ -247,13 +252,13 @@ max-height: 50vh;
 
                 </app-toolbar>
             </app-header>
-
+            {% endverbatim %}
             <iron-pages
                     selected="[[_page]]"
                     attr-for-selected="name"
                     fallback-selection="view404"
                     role="main">
-                {% for page in application.pages %}
+                {% for route, page in module.pages.items %}
                 {% tag page %}
                 {% endfor %}
                 <my-view404 name="view404"></my-view404>skype

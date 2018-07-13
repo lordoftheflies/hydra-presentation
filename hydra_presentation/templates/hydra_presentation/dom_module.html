@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="{{ module.name|polymer_case }}">
     <template>
-        <style include="{{ included_styles }}">
+        <style include="{{ module.included_styles }}">
             {% block style %}
             {% endblock style %}
 

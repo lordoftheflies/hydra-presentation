@@ -64,7 +64,8 @@ class BaseConfiguration(Configuration):
 
         'djangobower',
 
-        'hydra_presentation.apps.HydraPresentationConfig'
+        'hydra_presentation.apps.HydraPresentationConfig',
+        'hydra_presentation_app.apps.HydraPresentationAppConfig',
     ]
 
     MIDDLEWARE = [
@@ -92,11 +93,15 @@ class BaseConfiguration(Configuration):
                     'django.contrib.messages.context_processors.messages',
                 ],
                 'libraries': {
-
+                    'polymer': 'hydra_presentation.templatetags.polymer'
                 }
             },
         },
     ]
+
+    PRESENTATION = {
+        'ROOT_APP': 'hydra_presentation_app'
+    }
 
     WSGI_APPLICATION = 'hydra_presentation_demo.wsgi.application'
 
@@ -181,6 +186,22 @@ class BaseConfiguration(Configuration):
             },
         },
         'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'DEBUG'
+            },
+            'hydra_presentation.apps': {
+                'handlers': ['console'],
+                'level': 'DEBUG'
+            },
+            'hydra_presentation.polymer': {
+                'handlers': ['console'],
+                'level': 'DEBUG'
+            },
+            'hydra_presentation.templatetags.polymer': {
+                'handlers': ['console'],
+                'level': 'DEBUG'
+            },
             'hydra_presentation.models': {
                 'handlers': ['console'],
                 'level': 'DEBUG'
@@ -223,8 +244,10 @@ class PolymerConfiguration(object):
         "PolymerElements/iron-localstorage#^2.1.1",
         "PolymerElements/iron-media-query#^2.0.0",
         "PolymerElements/iron-pages#^2.0.0",
+        "PolymerElements/iron-scroll-target-behavior#^2.1.1",
         "PolymerElements/iron-selector#^2.0.0",
         "PolymerElements/paper-button",
+        "PolymerElements/paper-badge#^2.1.0",
         "PolymerElements/paper-card#^2.1.0",
         "PolymerElements/paper-checkbox#^2.0.2",
         "PolymerElements/paper-dialog#^2.1.1",
@@ -233,8 +256,8 @@ class PolymerConfiguration(object):
         "PolymerElements/paper-icon-button#^2.0.0",
         "PolymerElements/paper-input#^2.2.0",
         "PolymerElements/paper-item#^2.1.1",
-        "PolymerElements/paper-listbox#^2.1.0",
-        "PolymerElements/paper-menu-button#^2.1.0",
+        "PolymerElements/paper-listbox#^2.1.1",
+        "PolymerElements/paper-menu-button#^2.1.1",
         "PolymerElements/paper-progress#^2.1.0",
         "PolymerElements/paper-radio-button#^2.0.0",
         "PolymerElements/paper-radio-group#^2.1.0",

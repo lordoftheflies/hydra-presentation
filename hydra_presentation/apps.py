@@ -1,28 +1,50 @@
+import json
+import logging
+
 from django.apps import AppConfig
 
 from hydra_presentation import polymer
 
+logger = logging.getLogger(__name__)
 
-class HydraPresentationConfig(AppConfig):
-    name = 'hydra_presentation'
 
-    def __init__(self, app_name, app_module):
-        super().__init__(app_name, app_module)
-        self.application = None
+class PresentationAppConfig(AppConfig):
+    APP_NAME = 'my-app'
+    APP_TITLE = 'My application'
+    APP_PATH = 'src/my-application.html'
+    APP_BASE = 'Polymer.Element'
+    application = polymer.ApplicationBuilder().set_name(APP_NAME).set_title(APP_TITLE).set_path(APP_PATH).set_base(
+        'Polymer.Element').build()
 
     def render(self, builder: polymer.ApplicationBuilder) -> polymer.ApplicationBuilder:
-        return builder.set_name('my-app').set_title('My application').set_path('src/my-application.html')\
+        return builder.set_name('my-app').set_title('My application').set_path('src/my-app.html') \
             .set_base('Polymer.Element') \
             .mixin().set_namespace('Plutonium').set_name('NavigationHostMixin').append() \
             .mixin().set_namespace('Plutonium').set_name('SecurityMixin').append() \
             .mixin().set_namespace('Plutonium').set_name('NotificationConsumerMixin').append() \
-            .mixin().set_namespace('Polymer').set_name('Element').append() \
-            .page().set_name('my-profile').set_route('profile').set_title('Profil').set_path('src/my-profile-view.html').append() \
-            .component().set_name('my-application-selector').set_path('my-application-selector.html').append() \
-            .page().append()
+            .page().set_name('my-profile').set_route('profile').set_title('Profil').set_path(
+            'src/my-profile-view.html').append() \
+            .component().set_name('my-application-selector').set_path('my-application-selector.html').append()
 
     def ready(self):
-        super().ready()
-        self.application = self.render(
-            builder=polymer.ApplicationBuilder()
-        ).build()
+        try:
+            super().ready()
+            logger.info('Initialize presentation layer ...')
+            self.application = self.render(
+                builder=polymer.ApplicationBuilder(application=self.application)
+            ).build()
+
+            logger.debug('---------------------')
+            logger.debug('Polymer configuration')
+            logger.debug('---------------------')
+            logger.debug(self.application.to_json())
+            logger.debug('---------------------')
+        except BaseException as e:
+            logger.warning(e)
+
+
+class HydraPresentationConfig(PresentationAppConfig):
+    name = 'hydra_presentation'
+
+    def __init__(self, app_name, app_module):
+        super().__init__(app_name, app_module)
