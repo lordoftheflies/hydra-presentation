@@ -105,20 +105,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #eeeeee;
       }
 
-
-
     </style>
 </head>
 <body>
-<my-app
-        csrf-token="{% csrf_token %}"
-        user-info-endpoint-url="{% url 'user_info' %}"
-        log-out-endpoint-url="{% url 'account_logout' %}"
-        login-endpoint-url="{% url 'account_login' %}"
-        registration-endpoint-url="{% url 'account_signup' %}"
-        forgotten-password-endpoint-url="{% url 'account_change_password' %}"
-        main-title="{{ main_title }}">
-</my-app>
+
+{% tag application %}
+
 <noscript>
     Please enable JavaScript to view this website.
 </noscript>
