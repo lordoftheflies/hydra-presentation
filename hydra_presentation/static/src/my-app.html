@@ -23,13 +23,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../iron-localstorage/iron-localstorage.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../paper-badge/paper-badge.html">
 <link rel="import" href="../paper-fab/paper-fab.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../web-animations-js/web-animations-next-lite.min.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="plutonium-allauth-authentication.html">
+<link rel="import" href="plutonium-application-selector.html">
 <link rel="import" href="my-application-info.html">
-<link rel="import" href="my-user-info.html">
+<link rel="import" href="plutonium-user-info.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="plutonium-notification-mixin.html">
 <link rel="import" href="plutonium-navigation-mixin.html">
@@ -117,6 +120,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 @apply --layout-center-center;
             }
 
+            .main-toolbar {
+                @apply --layout-horizontal;
+                @apply --layout-center-center;
+            }
+
             #mainToast > paper-fab {
                 position: absolute;
                 top: -20px;
@@ -136,15 +144,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         </style>
 
-        <my-allauth-login
+        <plutonium-allauth-authentication
                 id="auth"
                 authenticated="{{authenticated}}"
-                user-info-endpoint-url="http://localhost:3000/userInfo"
-                log-out-endpoint-url="http://localhost:3000/logOut">
+                user-info-endpoint-url="[[userInfoEndpointUrl]]"
+                log-out-endpoint-url="[[logOutEndpointUrl]">
 
-        </my-allauth-login>
+        </plutonium-allauth-authentication>
         <brum-global-variable key="userData" value="{{storedUser}}"></brum-global-variable>
-
+        <iron-ajax url="http://localhost:3000/applications" method="GET" last-response="{{applications}}" auto></iron-ajax>
 
         <app-location
                 route="{{route}}"
@@ -173,20 +181,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <my-login
                             name="login"
                             remember-me
-                            login-endpoint-url="http://localhost:3000/logIn"
+                            login-endpoint-url="[[loginEndpointUrl]]"
                             forgotten-password-url="[[rootPath]]forgotten-password"
                             registration-url="[[rootPath]]registration">
 
                     </my-login>
                     <my-registration
                             name="registration"
-                            registration-endpoint-url="http://localhost:3000/registration"
+                            registration-endpoint-url="[[registrationEndpointUrl]]"
                             forgotten-password-url="[[rootPath]]forgotten-password"
                             login-url="[[rootPath]]login">
                     </my-registration>
                     <my-forgotten-password
                             name="forgotten-password"
-                            forgotten-password-endpoint-url="http://localhost:3000/forgotten-password"
+                            forgotten-password-endpoint-url="[[forgottenPasswordEndpointUrl]]"
                             login-url="[[rootPath]]login"
                             registration-url="[[rootPath]]registration">
                     </my-forgotten-password>
@@ -219,14 +227,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 <!-- Main content -->
                 <app-header-layout has-scrolling-region>
-                    <app-header slot="header" shadow condenses reveals>
-                        <app-toolbar>
+                    <app-header slot="header" shadow fixed>
+                        <app-toolbar class="main-toolbar">
                             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
                             <div main-title>[[mainTitle]]</div>
+                            <!--<div>-->
+                            <!--<label>[[storedUser.name]]</label>-->
+                            <!--<paper-icon-button icon="my-icons:lock-open" on-tap="logOut"></paper-icon-button>-->
+                            <!--</div>-->
                             <div>
-                                <label>[[storedUser.name]]</label>
-                                <paper-icon-button icon="my-icons:lock-open" on-tap="logOut"></paper-icon-button>
+                                <paper-badge for="notificationMenu" label="[[notifications.length]]" hidden="[[!notifications.length]]"></paper-badge>
+                                <paper-icon-button id="notificationMenu" icon="[[notificationIcon]]" on-tap="showToast"></paper-icon-button>
                             </div>
+                            <plutonium-application-selector applications="[[applications]]"></plutonium-application-selector>
+                            <plutonium-user-info has-image stored-user="[[storedUser]]"></plutonium-user-info>
+
                         </app-toolbar>
                     </app-header>
 
@@ -262,7 +277,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <template is="dom-repeat" items="[[notifications]]" as="feedback">
                 <div tabindex$="[[tabIndex]]" class$="[[feedback.level]]">
                     <div class="flex">[[feedback.message]]</div>
-                        <paper-icon-button icon="my-icons:close" on-tap="handleApproveNotification"></paper-icon-button>
+                    <paper-icon-button icon="my-icons:close" on-tap="handleApproveNotification"></paper-icon-button>
                 </div>
             </template>
 
@@ -285,13 +300,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         type: String
                     },
 
-
+                    userInfoEndpointUrl: {
+                        type: String
+                    },
+                    logOutEndpointUrl: {
+                        type: String
+                    },
+                    loginEndpointUrl: {
+                        type: String
+                    },
+                    registrationEndpointUrl: {
+                        type: String
+                    },
+                    forgottenPasswordEndpointUrl: {
+                        type: String
+                    },
                 };
             }
 
             static get observers() {
-                return [
-                ];
+                return [];
             }
 
             ready() {
@@ -300,9 +328,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
             }
-
-
-
 
 
         }

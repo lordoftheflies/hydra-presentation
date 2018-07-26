@@ -1,4 +1,5 @@
 {% load static %}
+{% load polymer %}
 
 <!--
 @license
@@ -17,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="generator" content="Polymer Starter Kit">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>{{ main_title }}</title>
+    <title>{{ application.title }}</title>
     <meta name="description" content="My App description">
 
     <!--
@@ -42,12 +43,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="{{ main_title }}">
+    <meta name="application-name" content="{{ application.title }}">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="{{ main_title }}">
+    <meta name="apple-mobile-web-app-title" content="{{ application.title }}">
 
     <!-- Homescreen icons -->
     <link rel="apple-touch-icon" href="{% static 'images/manifest/icon-48x48.png' %}">
@@ -74,12 +75,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       * to indicate the path from which you'll be serving, including leading
       * and trailing slashes (e.g., `/my-app/`).
       */
-      window.Polymer = {rootPath: '/my-app/'};
+      window.Polymer = {rootPath: '/'};
 
       // Load and register pre-caching Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-          navigator.serviceWorker.register("my-app/service-worker.js", {
+          navigator.serviceWorker.register("service-worker.js", {
             scope: Polymer.rootPath,
           });
         });
@@ -93,7 +94,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="{% static 'webcomponentsjs/webcomponents-loader.js' %}"></script>
     <script src="{% static 'web-animations-js/web-animations.min.js' %}"></script>
     <!-- Load your application shell -->
-    <link rel="import" href="{% static 'src/my-app.html' %}">
+    <link rel="import" href="{% url 'application' %}">
 
     <!-- Add any global styles for body, document, etc. -->
     <style>
@@ -105,20 +106,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #eeeeee;
       }
 
-
-
     </style>
 </head>
 <body>
-<my-app
-        csrf-token="{% csrf_token %}"
-        user-info-endpoint-url="{% url 'user_info' %}"
-        log-out-endpoint-url="{% url 'account_logout' %}"
-        login-endpoint-url="{% url 'account_login' %}"
-        registration-endpoint-url="{% url 'account_signup' %}"
-        forgotten-password-endpoint-url="{% url 'account_change_password' %}"
-        main-title="{{ main_title }}">
-</my-app>
+
+{% tag application %}
+
 <noscript>
     Please enable JavaScript to view this website.
 </noscript>

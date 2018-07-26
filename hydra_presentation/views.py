@@ -1,3 +1,5 @@
+from django.apps import apps
+from django.conf import settings
 from django.shortcuts import render
 
 
@@ -14,20 +16,22 @@ def user_info(request):
         )
     )
 
+
 def index(request):
+    current_app = apps.get_app_config(app_label=settings.PRESENTATION['ROOT_APP'])
     return render(
         request=request,
         template_name='hydra_presentation/spa.html',
-        context={
-            'main_title': 'Maintitle'
-        }
+        context=dict(application=current_app.application),
     )
 
 
 def application(request):
+    current_app = apps.get_app_config(app_label=settings.PRESENTATION['ROOT_APP'])
     return render(
         request=request,
-        template_name='hydra_presentation/application.html'
+        template_name='hydra_presentation/application.html',
+        context=dict(module=current_app.application),
     )
 
 
@@ -35,4 +39,11 @@ def page(request):
     return render(
         request=request,
         template_name='hydra_presentation/page.html'
+    )
+
+
+def form(request):
+    return render(
+        request=request,
+        template_name='hydra_presentation/form.html'
     )
