@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 
 from django.apps import AppConfig
 
@@ -19,6 +20,7 @@ class PresentationAppConfig(AppConfig):
     def render(self, builder: polymer.ApplicationBuilder) -> polymer.ApplicationBuilder:
         return builder.set_name('my-app').set_title('My application').set_path('src/my-app.html') \
             .set_base('Polymer.Element') \
+            .style().set_path('src/shared-styles.html').set_name('shared-styles').append() \
             .mixin().set_namespace('Plutonium').set_name('NavigationHostMixin').append() \
             .mixin().set_namespace('Plutonium').set_name('SecurityMixin').append() \
             .mixin().set_namespace('Plutonium').set_name('NotificationConsumerMixin').append() \
@@ -40,7 +42,8 @@ class PresentationAppConfig(AppConfig):
             logger.debug(self.application.to_json())
             logger.debug('---------------------')
         except BaseException as e:
-            logger.warning(e)
+            logger.warning(str(e))
+            traceback.print_exc()
 
 
 class HydraPresentationConfig(PresentationAppConfig):

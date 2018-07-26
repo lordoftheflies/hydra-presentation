@@ -10,6 +10,7 @@ class HydraPresentationAppConfig(PresentationAppConfig):
     def render(self, builder: polymer.ApplicationBuilder) -> polymer.ApplicationBuilder:
         return builder.set_name('my-app').set_title('My custom application').set_path('src/my-app.html') \
             .set_base('Polymer.Element') \
+            .style().set_path('src/shared-styles.html').set_name('shared-styles').append() \
             .mixin().set_namespace('Hydra').set_name('StaticMixin').append() \
             .page().set_name('my-page-static').set_route('page-static').set_title('Statikus oldal').set_path(
             'src/my-page-static.html').append() \

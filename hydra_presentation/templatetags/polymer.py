@@ -83,10 +83,7 @@ def base(module: polymer.Module):
 def tag(tag: polymer.Tag):
     return mark_safe('<%s %s>%s</%s>' % (
         tag.name,
-        ' '.join([(('%s="%s"' % (
-            str(key).lower(), str(value).lower() if isinstance(value, bool) else value)) if value is not None else key)
-                  for
-                  key, value in tag.attributes.items()]),
+        ' '.join([(('%s="%s"' % (polymer_case(value=key).lower(), str(value).lower() if isinstance(value, bool) else value)) if value is not None else key) for key, value in tag.attributes.items()]),
         '',
         tag.name
     ))

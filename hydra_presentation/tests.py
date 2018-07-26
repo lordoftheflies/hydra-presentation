@@ -192,7 +192,13 @@ class PolymerTemplateTagsTestCase(TestCase):
             name='test-component',
             path='src/test-component.html',
             lazy=True,
-
+            mixins=[
+                core.Mixin(
+                    namespace='TestNamespace',
+                    name='TestMixin'
+                )
+            ],
+            base='Polymer.Element'
         )
 
         django_engine = engines['django']
@@ -201,9 +207,10 @@ class PolymerTemplateTagsTestCase(TestCase):
         c = dict(testmodule=module)
 
         result = str(t.render(c))
-        print(result.replace('\n', ''))
+        print(result)
+        # print(result.replace('\n', ''))
 
         self.assertTrue('<dom-module id="test-component">' in result)
-        self.assertTrue('class TestComponent extends Polymer.Element' in result)
+        self.assertTrue('class TestComponent extends TestNamespace.TestMixin(Polymer.Element)' in result)
         self.assertTrue('window.customElements.define(TestComponent.is, TestComponent);' in result)
         self.assertTrue("static get is() { return 'test-component'; }" in result)

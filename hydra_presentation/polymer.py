@@ -1,28 +1,55 @@
-class Tag:
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class Resource:
+
+
+    def __init__(self, path: str = None, lazy: bool = False) -> None:
+        self.path = path
+        self.lazy = lazy
+
+
+class Tag(Resource):
     """
     Simple presentation tag
     """
-
-    def __init__(self, name: str, **kwargs) -> None:
-        self.name = name
-        self.attributes = kwargs
-
-
-class Component(Tag):
     FILENAME_TEMPLATE = '%s.html'
 
     def __init__(self, name: str, path: str = None, lazy: bool = False, **kwargs) -> None:
-        super().__init__(name=name, path=path, **kwargs)
-        self.path = path if path is not None else (self.FILENAME_TEMPLATE % self.name)
-        self.lazy = lazy
+        super().__init__(path=path if path is not None else (self.FILENAME_TEMPLATE % name), lazy=lazy)
+        self.name = name
+        self.attributes = kwargs
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def __str__(self):
         return '<%s %s>%s</%s>' % (
             self.name,
-            ' '.join([(('%s=%s' % (key, value)) if value is not None else key) for key, value in self.attributes]),
+            ' '.join(
+                [(('%s="%s"' % (key, value)) if value is not None else key) for key, value in self.attributes.items()]),
             '',
             self.name
         )
+
+
+class Component(Tag):
+
+    def __init__(self, name: str, path: str = None, lazy: bool = False, **kwargs) -> None:
+        super(Component, self).__init__(name=name, path=path, lazy=lazy, **kwargs)
+
+
+class Style(Resource):
+
+    def __init__(self, name: str, path: str = None, lazy: bool = False):
+        super().__init__(path=path, lazy=lazy)
+        self.name = name
+
+    def __str__(self):
+        return self.name
 
 
 class Mixin:
@@ -30,6 +57,13 @@ class Mixin:
     def __init__(self, namespace: str, name):
         self.namespace = namespace
         self.name = name
+
+    @property
+    def fqdn(self):
+        return '%s.%s' % (
+            self.namespace,
+            self.name
+        )
 
     def apply(self, base):
         return '%s.%s(%s)' % (
@@ -41,12 +75,19 @@ class Mixin:
 
 class Module(Component):
 
-    def __init__(self, name: str, path: str, components: list = [], mixins=[], base='Polymer.Element',
+    def __init__(self, name: str, path: str, components: list = [], mixins: list = [], styles: list = [],
+                 lazy: bool = False,
+                 base='Polymer.Element',
                  **kwargs) -> None:
-        super().__init__(name=name, path=path, **kwargs)
+        super().__init__(name=name, path=path, lazy=lazy, **kwargs)
         self.components = components
         self.mixins = mixins
         self.base = base
+        self.styles = styles
+
+    @property
+    def included_styles(self):
+        return ' '.join([str(style) for style in self.styles])
 
 
 class Page(Module):
@@ -64,11 +105,14 @@ class Page(Module):
 
 class Application(Module):
 
-    def __init__(self, name: str, path: str, title: str = None, components: list = [], pages: list = [],
+    def __init__(self, name: str, path: str, title: str = None, components: list = [], styles: list = [],
+                 lazy: bool = False, pages: dict = {},
                  **kwargs) -> None:
-        super().__init__(name=name, path=path, components=components, **kwargs)
+        super().__init__(name=name, path=path, components=components, styles=styles, lazy=lazy, **kwargs)
         self.title = title
         self.pages = pages
+        self.lazy = lazy
+        self.path = path
 
 
 class Builder:
@@ -127,14 +171,44 @@ class MixinBuilder(Builder):
         self.namespace = namespace
         return self
 
-    def build(self):
+    def build(self) -> Mixin:
         return Mixin(
             name=self.name,
             namespace=self.namespace
         )
 
     def append(self):
-        self.owner.mixins.append(self.build())
+        mixin = self.build()
+        self.owner.mixins.append(mixin)
+        logger.info('Apply mixin "%s" on "my-app"' % mixin.fqdn)
+        return super().append()
+
+
+class StyleBuilder(Builder):
+
+    def __init__(self, owner=None):
+        super().__init__(owner=owner)
+        self.name = None
+        self.path = None
+
+    def set_name(self, name: str) -> 'StyleBuilder':
+        self.name = name
+        return self
+
+    def set_path(self, path: str) -> 'StyleBuilder':
+        self.path = path
+        return self
+
+    def build(self) -> Style:
+        return Style(
+            name=self.name,
+            path=self.path
+        )
+
+    def append(self):
+        style = self.build()
+        self.owner.styles.append(style)
+        logger.info('Apply style "%s" on "my-app"' % style.name)
         return super().append()
 
 
@@ -147,6 +221,8 @@ class ModuleBuilder(TagBuilder):
         self.mixins = []
         self.base = 'Polymer.Element'
 
+        self.styles = []
+
     def set_path(self, path: str) -> 'ModuleBuilder':
         self.path = path
         return self
@@ -158,6 +234,9 @@ class ModuleBuilder(TagBuilder):
     def mixin(self) -> MixinBuilder:
         return MixinBuilder(owner=self)
 
+    def style(self) -> StyleBuilder:
+        return StyleBuilder(owner=self)
+
     def build(self):
         return Module(
             name=self.name,
@@ -165,6 +244,7 @@ class ModuleBuilder(TagBuilder):
             components=self.components,
             mixins=self.mixins,
             base=self.base,
+            styles=self.styles,
             **self.attributes
         )
 
@@ -184,7 +264,9 @@ class ComponentBuilder(ModuleBuilder):
         )
 
     def append(self) -> 'ApplicationBuilder':
-        self.owner.components.append(self.build())
+        component = self.build()
+        self.owner.components.append(component)
+        logger.info('Add component "%s" to "my-app"' % component.name)
         return super().append()
 
 
@@ -209,26 +291,44 @@ class PageBuilder(ModuleBuilder):
             title=self.title,
             path=self.path,
             components=self.components,
-            mixins=self.mixins
+            mixins=self.mixins,
+            styles=self.styles,
         )
 
     def append(self) -> 'ApplicationBuilder':
+        page = self.build()
         self.owner.add(
             route=self.route,
-            page=self.build()
+            page=page
         )
+        logger.info('Add page "%s" as "%s" to "my-app"' % (page.name, self.route))
         return super().append()
 
 
 class ApplicationBuilder(ComponentBuilder):
 
-    def __init__(self, owner=None):
+    def __init__(self, application: Application = None, owner=None):
         super().__init__(owner=owner)
 
-        self.title = None
-        self.name = None
-        self.components = []
-        self.pages = dict()
+        self.application = application
+        if application is None:
+            self.title = None
+            self.name = None
+            self.components = []
+            self.pages = dict()
+            self.styles = []
+            self.lazy = False
+        else:
+            self.components = application.components
+            self.pages = application.pages
+            self.mixins = application.mixins
+            self.lazy = application.lazy
+            self.base = application.base
+            self.path = application.path
+            self.title = application.title
+            self.name = application.name
+            self.attributes = application.attributes
+            self.styles = application.styles
 
     def set_title(self, title: str) -> 'ApplicationBuilder':
         self.title = title
@@ -242,11 +342,39 @@ class ApplicationBuilder(ComponentBuilder):
 
     def add(self, route, page: Page):
         self.pages[route] = page
+
         return self
 
+    def merge(self, updated_app: Application):
+        current_app = self.application
+        current_app.components = list(set(current_app.components + updated_app.components))
+        current_app.pages = {**current_app.pages, **updated_app.pages}
+        current_app.mixins = list(set(current_app.mixins + updated_app.mixins))
+        current_app.lazy = updated_app.lazy
+        current_app.base = updated_app.base
+        current_app.path = updated_app.path
+        current_app.title = updated_app.title
+        current_app.name = updated_app.name
+        current_app.attributes = {**current_app.attributes, **updated_app.attributes}
+        current_app.styles = list(set(current_app.styles + updated_app.styles))
+        return current_app
+
     def build(self) -> Application:
-        return Application(
-            name=self.name,
-            title=self.title,
-            path=self.path
-        )
+        if self.application is None:
+            return Application(
+                name=self.name,
+                title=self.title,
+                path=self.path,
+                pages=self.pages,
+                components=self.components,
+                styles=self.styles
+            )
+        else:
+            return self.merge(Application(
+                name=self.name,
+                title=self.title,
+                path=self.path,
+                pages=self.pages,
+                components=self.components,
+                styles=self.styles
+            ))

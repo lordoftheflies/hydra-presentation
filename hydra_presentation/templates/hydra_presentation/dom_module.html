@@ -28,10 +28,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             {% endblock style %}
 
         </style>
+
         {% block content %}
         {% endblock content %}
+
     </template>
     <script>
+        (function() {
+            'use strict';
+
+        {% block initialize %}
+
+        {% endblock initialize %}
+
         class {{ module.name|camel_case }} extends {{ module|base }} {
             static get is() { return '{{ module.name|polymer_case }}'; }
 
@@ -55,6 +64,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         window.customElements.define({{ module.name|camel_case }}.is, {{ module.name|camel_case }});
+
+        })();
 
     </script>
 </dom-module>

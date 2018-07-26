@@ -26,13 +26,13 @@ urlpatterns = [
         'document_root': settings.STATIC_ROOT
     }, name='service-worker'),
 
-    url(r'^.*$', TemplateView.as_view(template_name="hydra_presentation/spa.html"), name='index'),
-
     url(r'^src/my-app.html', views.application, name='application'),
+    # url(r'^(?P<path>)/(?P<path>.html)$', views.page, name='bower'),
     url(r'^src/my-(?P<path>.html)$', views.page, name='page'),
-
+    url(r'^user-info/$', views.user_info, name='user_info'),
     url(r'^src/(?P<path>/.html)$', serve),
 
-    path('user-info/', views.user_info, name='user_info')
+    url(r'^.*$', views.index, name='index'),
+
     # path(settings.POLYMER_APPLICATION_ROOT, admin.site.urls),
 ]
