@@ -64,22 +64,22 @@ class PresentationAppConfig(AppConfig):
     def ready(self):
         super().ready()
 
-        self.application = polymer.ApplicationBuilder().set_name(self.APP_NAME).set_title(self.APP_TITLE).set_path(
-            self.APP_PATH).set_base(self.APP_BASE).build()
+        # self.application = polymer.ApplicationBuilder().set_name(self.APP_NAME).set_title(self.APP_TITLE).set_path(
+        #     self.APP_PATH).set_base(self.APP_BASE).build()
 
         try:
-
             logger.info('Initialize presentation layer ...')
-            self.application = self.render(
-                builder=polymer.ApplicationBuilder(self.application)
-            ).build()
+            if HydraPresentationConfig.application is None:
+                HydraPresentationConfig.application = self.render(builder=polymer.ApplicationBuilder()).build()
+            else:
+                HydraPresentationConfig.application = self.render(builder=polymer.ApplicationBuilder(application=HydraPresentationConfig.application)).build()
 
-            logger.debug('--------------------------------------------------------------------------------------------')
+            logger.debug('------------------------------------------------------------------------------------------')
             logger.debug('Polymer configuration')
-            logger.debug('--------------------------------------------------------------------------------------------')
-            logger.debug(self.application.to_json())
-            logger.debug(
-                '\n--------------------------------------------------------------------------------------------')
+            logger.debug('------------------------------------------------------------------------------------------')
+            logger.debug(HydraPresentationConfig.application.to_json())
+            logger.debug('\n------------------------------------------------------------------------------------------')
+
         except BaseException as e:
             logger.warning(str(e))
             traceback.print_exc()

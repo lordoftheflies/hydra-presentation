@@ -108,10 +108,11 @@ class Page(Module):
 
 class Application(Module):
 
-    def __init__(self, name: str, path: str, title: str = None, components: list = [], styles: list = [],
+    def __init__(self, name: str, path: str, title: str = None, components: list = [], mixins: list = [],
+                 styles: list = [],
                  lazy: bool = False, pages: dict = {},
                  **kwargs) -> None:
-        super().__init__(name=name, path=path, components=components, styles=styles, lazy=lazy, **kwargs)
+        super().__init__(name=name, path=path, components=components, styles=styles, lazy=lazy, mixins=mixins, **kwargs)
         self.title = title
         self.pages = pages
         self.lazy = lazy
@@ -334,29 +335,29 @@ class ApplicationBuilder(ComponentBuilder):
         self.application = application
         if application is None:
             self.title = None
-            self.name = None
             self.components = []
             self.pages = dict()
             self.mixins = []
             self.lazy = False
             self.base = ELEMENT_ECMA_CLASS
             self.path = None
-            self.attributes = []
             self.styles = []
+            print('uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu')
         else:
             self.title = application.title
             self.name = application.name
-
             self.components = application.components
             self.pages = application.pages
-
             self.mixins = application.mixins
             self.lazy = application.lazy
             self.base = application.base
             self.path = application.path
-
             self.attributes = application.attributes
             self.styles = application.styles
+            print('ooooooooooooooooooooooooooooooooooooooooooooooo')
+
+        print('------------------eeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+        print(self.pages)
 
     def set_title(self, title: str) -> 'ApplicationBuilder':
         self.title = title
@@ -390,19 +391,27 @@ class ApplicationBuilder(ComponentBuilder):
     def build(self) -> Application:
         if self.application is None:
             return Application(
-                name=self.name,
                 title=self.title,
-                path=self.path,
-                pages=self.pages,
+                name=self.name,
                 components=self.components,
-                styles=self.styles
+                pages=self.pages,
+                mixins=self.mixins,
+                lazy=self.lazy,
+                base=self.base,
+                path=self.path,
+                styles=self.styles,
+                **self.attributes
             )
         else:
             return self.merge(Application(
-                name=self.name,
                 title=self.title,
-                path=self.path,
-                pages=self.pages,
+                name=self.name,
                 components=self.components,
-                styles=self.styles
+                pages=self.pages,
+                mixins=self.mixins,
+                lazy=self.lazy,
+                base=self.base,
+                path=self.path,
+                styles=self.styles,
+                **self.attributes
             ))
