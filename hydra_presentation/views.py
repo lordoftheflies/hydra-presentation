@@ -38,7 +38,9 @@ def index(request):
     return render(
         request=request,
         template_name='hydra_presentation/spa.html',
-        context=dict(application=current_app.application),
+        context=dict(
+            application=current_app.application
+        ),
     )
 
 

@@ -17,7 +17,11 @@ class PresentationAppConfig(AppConfig):
     APP_PATH = 'src/my-app.html'
     APP_BASE = polymer.ELEMENT_ECMA_CLASS
 
-    application = None
+    application_instance = None
+
+    @property
+    def application(self):
+        return PresentationAppConfig.application_instance
 
     def render(self, builder: polymer.ApplicationBuilder) -> polymer.ApplicationBuilder:
         return builder \
@@ -56,9 +60,29 @@ class PresentationAppConfig(AppConfig):
             .set_path(static('src/plutonium-application-selector.html')) \
             .append() \
             .page() \
+            .set_route('view404') \
             .set_name('my-view404') \
             .set_path(static('src/my-view404.html')) \
-            .set_route('view404') \
+            .append() \
+            .page() \
+            .set_route('view1') \
+            .set_name('my-view1') \
+            .set_path(static('src/my-view1.html')) \
+            .append() \
+            .page() \
+            .set_route('view2') \
+            .set_name('my-view2') \
+            .set_path(static('src/my-view2.html')) \
+            .append() \
+            .page() \
+            .set_route('view3') \
+            .set_name('my-view3') \
+            .set_path(static('src/my-view3.html')) \
+            .append() \
+            .page() \
+            .set_route('components-demo') \
+            .set_name('my-components-demo') \
+            .set_path(static('src/my-components-demo.html')) \
             .append()
 
     def ready(self):
@@ -69,15 +93,15 @@ class PresentationAppConfig(AppConfig):
 
         try:
             logger.info('Initialize presentation layer ...')
-            if HydraPresentationConfig.application is None:
-                HydraPresentationConfig.application = self.render(builder=polymer.ApplicationBuilder()).build()
+            if PresentationAppConfig.application_instance is None:
+                PresentationAppConfig.application_instance = self.render(builder=polymer.ApplicationBuilder()).build()
             else:
-                HydraPresentationConfig.application = self.render(builder=polymer.ApplicationBuilder(application=HydraPresentationConfig.application)).build()
+                PresentationAppConfig.application_instance = self.render(builder=polymer.ApplicationBuilder(application=PresentationAppConfig.application_instance)).build()
 
             logger.debug('------------------------------------------------------------------------------------------')
             logger.debug('Polymer configuration')
             logger.debug('------------------------------------------------------------------------------------------')
-            logger.debug(HydraPresentationConfig.application.to_json())
+            logger.debug(PresentationAppConfig.application_instance.to_json())
             logger.debug('\n------------------------------------------------------------------------------------------')
 
         except BaseException as e:
