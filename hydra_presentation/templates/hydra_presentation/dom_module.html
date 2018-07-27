@@ -11,16 +11,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="{% static 'polymer/polymer-element.html' %}">
-
-{% block styles %}
-{% endblock styles %}
-
-{% block icons %}
-{% endblock icons %}
-
+<!-- POLYMER COMPONENTS -->
 {% block components %}
 {% endblock components %}
-
+<!-- SHARED STYLES -->
+{% block styles %}
+{% endblock styles %}
+<!-- SHARED ICONS -->
+{% block icons %}
+{% endblock icons %}
 <dom-module id="{{ module.name|polymer_case }}">
     <template>
         <style include="{{ module.included_styles }}">
@@ -33,12 +32,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         {% endblock content %}
 
     </template>
-    <script>
-        (function() {
-            'use strict';
+    <script type="text/javascript">
+    (function() {
+        'use strict';
 
         {% block initialize %}
-
         {% endblock initialize %}
 
         class {{ module.name|camel_case }} extends {{ module|base }} {
@@ -64,8 +62,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         window.customElements.define({{ module.name|camel_case }}.is, {{ module.name|camel_case }});
-
-        })();
-
+    })();
     </script>
 </dom-module>

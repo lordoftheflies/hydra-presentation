@@ -13,15 +13,14 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 {% block styles %}
-<link rel="import" href="shared-styles.html">
+{% for style in module.styles %}
+{% link style %}
+{% endfor %}
 {% endblock styles %}
-
 {% block icons %}
-<link rel="import" href="my-icons.html">
+<link rel="import" href="{% static 'src/my-icons.html' %}">
 {% endblock icons %}
-
 {% block components %}
-
 <link rel="import" href="{% static 'app-layout/app-drawer/app-drawer.html' %}">
 <link rel="import" href="{% static 'app-layout/app-drawer-layout/app-drawer-layout.html' %}">
 <link rel="import" href="{% static 'app-layout/app-header/app-header.html' %}">
@@ -39,11 +38,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="{% static 'paper-fab/paper-fab.html' %}">
 <link rel="import" href="{% static 'paper-icon-button/paper-icon-button.html' %}">
 <link rel="import" href="{% static 'paper-toast/paper-toast.html' %}">
-
+<!-- CUSTOM COMPONENTS -->
 {% for component in module.components %}
 {% link component %}
 {% endfor %}
-
+<!-- APPLICATION SHELL MIXINS -->
+{% for mixin in module.mixins %}
+{% link mixin %}
+{% endfor %}
+<!-- APPLICATION SHELL PAGES -->
 {% for route, page in module.pages.items %}
 {% link page %}
 {% endfor %}
@@ -154,7 +157,7 @@ max-height: 50vh;
 
 </plutonium-allauth-authentication>
 <brum-global-variable key="userData" value="{{storedUser}}"></brum-global-variable>
-<iron-ajax url="http://localhost:3000/applications" method="GET" last-response="{{applications}}" auto></iron-ajax>
+<iron-ajax url="[[applicationIndexEndpointUrl]]" method="GET" last-response="{{applications}}" auto></iron-ajax>
 
 <app-location
         route="{{route}}"
@@ -293,31 +296,33 @@ max-height: 50vh;
 {% endblock content %}
 
 {% block initialize %}
-// Gesture events like tap and track generated from touch will not be
-// preventable, allowing for better scrolling performance.
-Polymer.setPassiveTouchGestures(true);
+            // Gesture events like tap and track generated from touch will not be
+            // preventable, allowing for better scrolling performance.
+            window.Polymer.setPassiveTouchGestures(true);
 {% endblock initialize %}
 
 {% block properties %}
-mainTitle: {
-type: String
-},
-
-userInfoEndpointUrl: {
-type: String
-},
-logOutEndpointUrl: {
-type: String
-},
-loginEndpointUrl: {
-type: String
-},
-registrationEndpointUrl: {
-type: String
-},
-forgottenPasswordEndpointUrl: {
-type: String
-},
+                mainTitle: {
+                    type: String
+                },
+                userInfoEndpointUrl: {
+                    type: String
+                },
+                logOutEndpointUrl: {
+                    type: String
+                },
+                loginEndpointUrl: {
+                    type: String
+                },
+                registrationEndpointUrl: {
+                    type: String
+                },
+                forgottenPasswordEndpointUrl: {
+                    type: String
+                },
+                applicationIndexEndpointUrl: {
+                    type: String
+                },
 {% endblock properties %}
 
 {% block observers %}

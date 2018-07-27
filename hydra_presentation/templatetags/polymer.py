@@ -31,6 +31,7 @@ def camel_case(value: str):
     except BaseException as e:
         logger.warning(str(e))
         traceback.print_exc()
+        result = value
     finally:
         return result
 
@@ -90,7 +91,7 @@ def tag(tag: polymer.Tag):
 
 
 @register.simple_tag
-def link(component: polymer.Component):
+def link(component: polymer.Resource):
     import_attribute = 'lazy-import' if component.lazy else 'import'
     return mark_safe('<link rel="%s" href="%s">' % (
         import_attribute,

@@ -3,13 +3,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+ELEMENT_ECMA_CLASS = 'window.Polymer.Element'
+
 
 class Resource:
-
 
     def __init__(self, path: str = None, lazy: bool = False) -> None:
         self.path = path
         self.lazy = lazy
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
 class Tag(Resource):
@@ -23,9 +27,6 @@ class Tag(Resource):
         self.name = name
         self.attributes = kwargs
 
-    def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
     def __str__(self):
         return '<%s %s>%s</%s>' % (
             self.name,
@@ -38,8 +39,9 @@ class Tag(Resource):
 
 class Component(Tag):
 
-    def __init__(self, name: str, path: str = None, lazy: bool = False, **kwargs) -> None:
+    def __init__(self, name: str, path: str = None, base=ELEMENT_ECMA_CLASS, lazy: bool = False, **kwargs) -> None:
         super(Component, self).__init__(name=name, path=path, lazy=lazy, **kwargs)
+        self.base = base
 
 
 class Style(Resource):
@@ -52,9 +54,10 @@ class Style(Resource):
         return self.name
 
 
-class Mixin:
+class Mixin(Resource):
 
-    def __init__(self, namespace: str, name):
+    def __init__(self, namespace: str, name: str, path: str):
+        super().__init__(path=path, lazy=False)
         self.namespace = namespace
         self.name = name
 
@@ -77,7 +80,7 @@ class Module(Component):
 
     def __init__(self, name: str, path: str, components: list = [], mixins: list = [], styles: list = [],
                  lazy: bool = False,
-                 base='Polymer.Element',
+                 base=ELEMENT_ECMA_CLASS,
                  **kwargs) -> None:
         super().__init__(name=name, path=path, lazy=lazy, **kwargs)
         self.components = components
@@ -94,7 +97,7 @@ class Page(Module):
     TOKEN_SEPARATOR = '-'
 
     def __init__(self, name: str, path: str, title: str = None, components: list = [], **kwargs) -> None:
-        super().__init__(name=name, path=path, components=components, **kwargs)
+        super().__init__(name=name, path=path, components=components, lazy=True, **kwargs)
         self.title = title
         self.components = components
 
@@ -113,6 +116,9 @@ class Application(Module):
         self.pages = pages
         self.lazy = lazy
         self.path = path
+
+    def get_page(self, route: str):
+        return self.pages[route]
 
 
 class Builder:
@@ -162,6 +168,7 @@ class MixinBuilder(Builder):
         super().__init__(owner=owner)
         self.namespace = None
         self.name = None
+        self.path = None
 
     def set_name(self, name: str) -> 'MixinBuilder':
         self.name = name
@@ -171,10 +178,15 @@ class MixinBuilder(Builder):
         self.namespace = namespace
         return self
 
+    def set_path(self, path: str) -> 'MixinBuilder':
+        self.path = path
+        return self
+
     def build(self) -> Mixin:
         return Mixin(
             name=self.name,
-            namespace=self.namespace
+            namespace=self.namespace,
+            path=self.path
         )
 
     def append(self):
@@ -219,8 +231,8 @@ class ModuleBuilder(TagBuilder):
         self.path = None
         self.components = []
         self.mixins = []
-        self.base = 'Polymer.Element'
-
+        self.base = ELEMENT_ECMA_CLASS
+        self.lazy = False
         self.styles = []
 
     def set_path(self, path: str) -> 'ModuleBuilder':
@@ -231,8 +243,15 @@ class ModuleBuilder(TagBuilder):
         self.base = base
         return self
 
+    def set_lazy(self, lazy: str) -> 'ModuleBuilder':
+        self.lazy = lazy
+        return self
+
     def mixin(self) -> MixinBuilder:
         return MixinBuilder(owner=self)
+
+    def component(self) -> 'ComponentBuilder':
+        return ComponentBuilder(owner=self)
 
     def style(self) -> StyleBuilder:
         return StyleBuilder(owner=self)
@@ -245,13 +264,14 @@ class ModuleBuilder(TagBuilder):
             mixins=self.mixins,
             base=self.base,
             styles=self.styles,
+            lazy=self.lazy,
             **self.attributes
         )
 
 
 class ComponentBuilder(ModuleBuilder):
 
-    def __init__(self, owner: 'ApplicationBuilder') -> None:
+    def __init__(self, owner=None) -> None:
         super().__init__(owner=owner)
         self.lazy = False
 
@@ -263,7 +283,7 @@ class ComponentBuilder(ModuleBuilder):
             **self.attributes
         )
 
-    def append(self) -> 'ApplicationBuilder':
+    def append(self) -> 'ModuleBuilder':
         component = self.build()
         self.owner.components.append(component)
         logger.info('Add component "%s" to "my-app"' % component.name)
@@ -272,7 +292,7 @@ class ComponentBuilder(ModuleBuilder):
 
 class PageBuilder(ModuleBuilder):
 
-    def __init__(self, owner: 'ApplicationBuilder', route: str = None):
+    def __init__(self, owner=None, route: str = None):
         super().__init__(owner=owner)
         self.route = route
         self.title = None
@@ -293,6 +313,7 @@ class PageBuilder(ModuleBuilder):
             components=self.components,
             mixins=self.mixins,
             styles=self.styles,
+            **self.attributes
         )
 
     def append(self) -> 'ApplicationBuilder':
@@ -316,17 +337,24 @@ class ApplicationBuilder(ComponentBuilder):
             self.name = None
             self.components = []
             self.pages = dict()
-            self.styles = []
+            self.mixins = []
             self.lazy = False
+            self.base = ELEMENT_ECMA_CLASS
+            self.path = None
+            self.attributes = []
+            self.styles = []
         else:
+            self.title = application.title
+            self.name = application.name
+
             self.components = application.components
             self.pages = application.pages
+
             self.mixins = application.mixins
             self.lazy = application.lazy
             self.base = application.base
             self.path = application.path
-            self.title = application.title
-            self.name = application.name
+
             self.attributes = application.attributes
             self.styles = application.styles
 
