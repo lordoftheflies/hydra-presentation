@@ -300,6 +300,7 @@ class PageBuilder(ModuleBuilder):
 
     def set_route(self, route: str) -> 'PageBuilder':
         self.route = route
+        self.attributes['sslug'] = route
         return self
 
     def set_title(self, title: str) -> 'PageBuilder':

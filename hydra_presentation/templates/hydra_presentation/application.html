@@ -258,7 +258,7 @@ max-height: 50vh;
 
             <iron-pages
                     selected="[[_page]]"
-                    attr-for-selected="name"
+                    attr-for-selected="slug"
                     fallback-selection="view404"
                     role="main">
                 {% endverbatim %}
@@ -266,7 +266,6 @@ max-height: 50vh;
                     {% tag page %}
                 {% endfor %}
                 {% verbatim %}
-                <my-view404 name="view404"></my-view404>
                 skype
             </iron-pages>
 
@@ -302,27 +301,27 @@ max-height: 50vh;
 {% endblock initialize %}
 
 {% block properties %}
-                mainTitle: {
-                    type: String
-                },
-                userInfoEndpointUrl: {
-                    type: String
-                },
-                logOutEndpointUrl: {
-                    type: String
-                },
-                loginEndpointUrl: {
-                    type: String
-                },
-                registrationEndpointUrl: {
-                    type: String
-                },
-                forgottenPasswordEndpointUrl: {
-                    type: String
-                },
-                applicationIndexEndpointUrl: {
-                    type: String
-                },
+                    mainTitle: {
+                        type: String
+                    },
+                    userInfoEndpointUrl: {
+                        type: String
+                    },
+                    logOutEndpointUrl: {
+                        type: String
+                    },
+                    loginEndpointUrl: {
+                        type: String
+                    },
+                    registrationEndpointUrl: {
+                        type: String
+                    },
+                    forgottenPasswordEndpointUrl: {
+                        type: String
+                    },
+                    applicationIndexEndpointUrl: {
+                        type: String
+                    },
 {% endblock properties %}
 
 {% block observers %}
