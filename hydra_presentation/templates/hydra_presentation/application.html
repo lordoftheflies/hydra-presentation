@@ -12,14 +12,6 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-{% block styles %}
-{% for style in module.styles %}
-{% link style %}
-{% endfor %}
-{% endblock styles %}
-{% block icons %}
-<link rel="import" href="{% static 'src/my-icons.html' %}">
-{% endblock icons %}
 {% block components %}
 <link rel="import" href="{% static 'app-layout/app-drawer/app-drawer.html' %}">
 <link rel="import" href="{% static 'app-layout/app-drawer-layout/app-drawer-layout.html' %}">
@@ -42,6 +34,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 {% for component in module.components %}
 {% link component %}
 {% endfor %}
+
+{% block styles %}
+{% for style in module.styles %}
+{% link style %}
+{% endfor %}
+{% endblock styles %}
+{% block icons %}
+<link rel="import" href="{% static 'src/my-icons.html' %}">
+{% endblock icons %}
+
 <!-- APPLICATION SHELL MIXINS -->
 {% for mixin in module.mixins %}
 {% link mixin %}
@@ -262,11 +264,10 @@ max-height: 50vh;
                     fallback-selection="view404"
                     role="main">
                 {% endverbatim %}
-                {% for route, page in module.pages.items %}
+                    {% for route, page in module.pages.items %}
                     {% tag page %}
-                {% endfor %}
+                    {% endfor %}
                 {% verbatim %}
-                skype
             </iron-pages>
 
 
