@@ -11,29 +11,79 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
+{% block styles %}
+{% for style in module.styles %}
+{% link style %}
+{% endfor %}
+{% endblock styles %}
+{% block icons %}
+<link rel="import" href="{% static 'src/my-icons.html' %}">
+{% endblock icons %}
+{% block components %}
+<!--<link rel="import" href="{% static 'app-layout/app-drawer/app-drawer.html' %}">-->
+<!--<link rel="import" href="{% static 'app-layout/app-drawer-layout/app-drawer-layout.html' %}">-->
+<!--<link rel="import" href="{% static 'app-layout/app-header/app-header.html' %}">-->
+<!--<link rel="import" href="{% static 'app-layout/app-header-layout/app-header-layout.html' %}">-->
+<!--<link rel="import" href="{% static 'app-layout/app-scroll-effects/app-scroll-effects.html' %}">-->
+<!--<link rel="import" href="{% static 'app-layout/app-toolbar/app-toolbar.html' %}">-->
+<!--<link rel="import" href="{% static 'app-route/app-location.html' %}">-->
+<!--<link rel="import" href="{% static 'app-route/app-route.html' %}">-->
+<link rel="import" href="{% static 'brum-global-variable/brum-global-variable.html' %}">
+<link rel="import" href="{% static 'iron-ajax/iron-ajax.html' %}">
+<link rel="import" href="{% static 'iron-list/iron-list.html' %}">
+<link rel="import" href="{% static 'iron-localstorage/iron-localstorage.html' %}">
+<link rel="import" href="{% static 'iron-pages/iron-pages.html' %}">
+<link rel="import" href="{% static 'iron-selector/iron-selector.html' %}">
+<link rel="import" href="{% static 'paper-fab/paper-fab.html' %}">
+<link rel="import" href="{% static 'paper-icon-button/paper-icon-button.html' %}">
+<link rel="import" href="{% static 'paper-toast/paper-toast.html' %}">
+<!-- CUSTOM COMPONENTS -->
+{% for component in module.components %}
+{% link component %}
+{% endfor %}
+<!-- APPLICATION SHELL MIXINS -->
+{% for mixin in module.mixins %}
+{% link mixin %}
+{% endfor %}
 
-<link rel="import" href="shared-styles.html">
+{% endblock components %}
 
-<dom-module id="my-view1">
-  <template>
-    <style include="shared-styles">
-      :host {
-        display: block;
+{% block style %}
+{% endblock style %}
 
-        padding: 10px;
-      }
-    </style>
+{% block content %}
+{% endblock content %}
 
-    {% block page_content %}
-    {% endblock page_content %}
+{% block initialize %}
+{% endblock initialize %}
 
-  </template>
+{% block properties %}
+                mainTitle: {
+                    type: String
+                },
+                userInfoEndpointUrl: {
+                    type: String
+                },
+                logOutEndpointUrl: {
+                    type: String
+                },
+                loginEndpointUrl: {
+                    type: String
+                },
+                registrationEndpointUrl: {
+                    type: String
+                },
+                forgottenPasswordEndpointUrl: {
+                    type: String
+                },
+                applicationIndexEndpointUrl: {
+                    type: String
+                },
+{% endblock properties %}
 
-  <script>
-    class MyView1 extends Polymer.Element {
-      static get is() { return 'my-view1'; }
-    }
+{% block observers %}
+{% endblock observers %}
 
-    window.customElements.define(MyView1.is, MyView1);
-  </script>
-</dom-module>
+{% block code %}
+
+{% endblock code %}

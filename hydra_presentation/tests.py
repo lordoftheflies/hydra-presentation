@@ -1,10 +1,14 @@
 from configurations.management import call_command
+from django.apps import apps
 from django.conf import settings
 from django.template import Context, engines
 from django.template.backends.django import Template
 from django.test import TestCase
+from django.urls import reverse
+
 from hydra_presentation import polymer as core
 from hydra_presentation.templatetags import polymer as library
+from django.test import Client
 
 
 # Create your tests here.
@@ -37,6 +41,148 @@ from hydra_presentation.templatetags import polymer as library
 #             'compile': True
 #         }
 #         call_command('polymer', *args, **opts)
+
+class PolymerBuilderTestCase(TestCase):
+
+    def test_tag_builder(self):
+        builder = core.TagBuilder()
+        given = core.Tag(name='test-component', attribute_string='attribute_value', attribute_flag=None)
+        tag = builder.set_attribute('attribute_string', 'attribute_value').set_name('test-component').set_flag(
+            'attribute_flag').build()
+        self.assertEqual(given.to_json(), tag.to_json())
+
+    def test_component_builder(self):
+        builder = core.ComponentBuilder()
+        given = core.Component(
+            name='test-component',
+            base=core.ELEMENT_ECMA_CLASS,
+            lazy=True, path='path',
+            attribute_string='attribute_value',
+            attribute_flag=None
+        )
+        component = builder.set_attribute('attribute_string', 'attribute_value').set_name('test-component').set_flag(
+            'attribute_flag').set_path('path').set_lazy(True).set_base(core.ELEMENT_ECMA_CLASS).build()
+        self.assertEqual(given.to_json(), component.to_json())
+
+    def test_mixin_builder(self):
+        builder = core.MixinBuilder()
+        given = core.Mixin(
+            name='name',
+            path='path',
+            namespace='ns'
+        )
+        mixin = builder.set_path('path').set_name('name').set_namespace('ns').build()
+        self.assertEqual(given.to_json(), mixin.to_json())
+
+    def test_style_builder(self):
+        builder = core.StyleBuilder()
+        given = core.Style(name='name', path='path')
+        style = builder.set_name('name').set_path('path').build()
+        self.assertEqual(given.to_json(), style.to_json())
+
+    def test_module_builder(self):
+        builder = core.ModuleBuilder()
+
+        given_style = core.Style(name='name', path='path')
+        given_component = core.Component(
+            name='test-component',
+            base=core.ELEMENT_ECMA_CLASS,
+            lazy=True,
+            path='path',
+            attribute_string='attribute_value',
+            attribute_flag=None
+        )
+        given_mixin = core.Mixin(
+            name='name',
+            path='path',
+            namespace='ns'
+        )
+        given = core.Module(
+            name='name',
+            path='path',
+            components=[given_component],
+            mixins=[given_mixin],
+            styles=[given_style],
+            lazy=True,
+            attribute_string='value',
+            attribute_flag=None
+        )
+
+        module = builder \
+            .set_name('name') \
+            .set_path('path') \
+            .set_lazy(True) \
+            .set_flag('attribute_flag') \
+            .set_attribute(name='attribute_string', value='value') \
+            .mixin() \
+            .set_path('path') \
+            .set_name('name') \
+            .set_namespace('ns') \
+            .append() \
+            .style() \
+            .set_name('name') \
+            .set_path('path') \
+            .append() \
+            .component() \
+            .set_attribute(name='attribute_string', value='attribute_value') \
+            .set_name('test-component') \
+            .set_flag('attribute_flag') \
+            .set_path('path') \
+            .set_lazy(True) \
+            .set_base(core.ELEMENT_ECMA_CLASS) \
+            .append() \
+            .build()
+
+        self.assertEqual(given.to_json(), module.to_json())
+
+    def test_page_builder(self):
+        builder = core.PageBuilder()
+        given_component = core.Component(
+            name='test-component',
+            base=core.ELEMENT_ECMA_CLASS,
+            lazy=True,
+            path='path',
+            attribute_string='attribute_value',
+            attribute_flag=None
+        )
+        given = core.Page(
+            name='name',
+            path='path',
+            title='title',
+            components=[given_component],
+            attribute_string='attribute_value',
+            mixins=[],
+            styles=[]
+        )
+        page = builder \
+            .set_name('name') \
+            .set_path('path') \
+            .set_attribute(name='attribute_string', value='attribute_value') \
+            .set_title('title') \
+            .set_base(core.ELEMENT_ECMA_CLASS) \
+            .component() \
+            .set_attribute(name='attribute_string', value='attribute_value') \
+            .set_name('test-component') \
+            .set_flag('attribute_flag') \
+            .set_path('path') \
+            .set_lazy(True) \
+            .set_base(core.ELEMENT_ECMA_CLASS) \
+            .append() \
+            .build()
+        self.assertEqual(given.to_json(), page.to_json())
+
+    def test_application_builder(self):
+        builder = core.ApplicationBuilder()
+
+        given = core.Application(name='name', path='path', title='title')
+
+        app = builder \
+            .set_name('name') \
+            .set_path('path') \
+            .set_title('title') \
+            .build()
+
+        self.assertEqual(given.to_json(), app.to_json())
 
 
 class PolymerTemplateTagsTestCase(TestCase):
@@ -104,19 +250,23 @@ class PolymerTemplateTagsTestCase(TestCase):
             mixins=[
                 core.Mixin(
                     namespace='TestNameSpace',
-                    name='TestMixin0'
+                    name='TestMixin0',
+                    path='src/test-mixin0.html'
                 ),
                 core.Mixin(
                     namespace='TestNameSpace',
-                    name='TestMixin1'
+                    name='TestMixin1',
+                    path='src/test-mixin1.html'
                 ),
                 core.Mixin(
                     namespace='TestNameSpace',
-                    name='TestMixin2'
+                    name='TestMixin2',
+                    path='src/test-mixin2.html'
                 ),
                 core.Mixin(
                     namespace='TestNameSpace',
-                    name='TestMixin3'
+                    name='TestMixin3',
+                    path='src/test-mixin3.html'
                 ),
             ],
             base='TestNameSpace.BaseElement'
@@ -195,7 +345,8 @@ class PolymerTemplateTagsTestCase(TestCase):
             mixins=[
                 core.Mixin(
                     namespace='TestNamespace',
-                    name='TestMixin'
+                    name='TestMixin',
+                    path='src/test-mixin.html'
                 )
             ],
             base='Polymer.Element'
@@ -214,3 +365,42 @@ class PolymerTemplateTagsTestCase(TestCase):
         self.assertTrue('class TestComponent extends TestNamespace.TestMixin(Polymer.Element)' in result)
         self.assertTrue('window.customElements.define(TestComponent.is, TestComponent);' in result)
         self.assertTrue("static get is() { return 'test-component'; }" in result)
+
+
+class PresentationViewsTestCase(TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+
+    def test_service_worker(self):
+        response = self.client.get(reverse('service_worker'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_application(self):
+        response = self.client.get(reverse('application'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_page_404(self):
+        current_app = apps.get_app_config(app_label=settings.PRESENTATION['ROOT_APP'])
+        current_app.application.pages['view404'] = core.Page(name='view404', path='src/my-view404.html')
+
+        response = self.client.get(reverse('page', args=['view404']))
+        self.assertEqual(response.status_code, 200)
+
+    def test_index(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_src(self):
+        # response = self.client.get(reverse('page'))
+        # self.assertEqual(response.status_code, 200)
+        pass
+
+    def test_user_info(self):
+        response = self.client.get(reverse('user_info'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_application_index(self):
+        response = self.client.get(reverse('application_index'))
+        self.assertEqual(response.status_code, 200)

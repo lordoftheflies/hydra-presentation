@@ -16,23 +16,34 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls import url
 from django.urls import path
-from django.views.generic import TemplateView
 from django.views.static import serve
+
 from . import views
 
 urlpatterns = [
+    # Static service worker from static files
     url(r'^service-worker.js$', serve, kwargs={
         'path': 'service-worker.js',
         'document_root': settings.STATIC_ROOT
-    }, name='service-worker'),
-
+    }, name='service_worker'),
+    # Dynamic Polymer application view
     url(r'^src/my-app.html', views.application, name='application'),
-    # url(r'^(?P<path>)/(?P<path>.html)$', views.page, name='bower'),
-    url(r'^src/my-(?P<path>.html)$', views.page, name='page'),
+    # Dynamic Polymer page view
+    path(r'page/my-<str:path>.html', views.page, name='page'),
+    # Static Polymer application source files
+    url(r'^src/(?P<path>.*)$', serve, kwargs={
+        'document_root': settings.STATIC_ROOT + '/src'
+    }, name='source'),
+    # Dynamic Polymer application shell view
+    url(r'^index.html', views.index, name='index'),
+    # API: User info
     url(r'^user-info/$', views.user_info, name='user_info'),
-    url(r'^src/(?P<path>/.html)$', serve),
+    # API: Application entry point list
+    url(r'^applications/$', views.application_index, name='application_index'),
 
-    url(r'^.*$', views.index, name='index'),
-
+    # url(r'^(?P<path>)/(?P<path>.html)$', views.page, name='bower'),
+    # path(r'index.html', views.page, name='index'),
+    # url(r'my-app/.*$', views.index, name='index'),
+    # url(r'', RedirectView.as_view(url='index.html', permanent=True), name='home'),
     # path(settings.POLYMER_APPLICATION_ROOT, admin.site.urls),
 ]
