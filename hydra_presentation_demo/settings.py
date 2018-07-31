@@ -150,7 +150,14 @@ class BaseConfiguration(Configuration):
     # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
     STATIC_URL = '/static/'
+    # STATIC_ROOT = 'staticfiles'
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    # STATICFILES_DIRS = (
+    #     os.path.join(BASE_DIR, 'static'),
+    # )
+
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
     # Add it on your settings.py file
     # STATICFILES_DIRS = [
     #     os.path.join(BASE_DIR, "static"),  # your static/ files folder
