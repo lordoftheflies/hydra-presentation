@@ -1,0 +1,8 @@
+include LICENSE
+include README.rst
+include requirements.txt
+recursive-include requirements *
+include manage.py
+recursive-include hydra_presentation/static *
+recursive-include hydra_presentation/templates *
+recursive-include docs *
