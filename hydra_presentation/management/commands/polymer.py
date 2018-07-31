@@ -246,7 +246,7 @@ class Command(BaseCommand):
         self.process_directories_reqursively(
             path=self.module_static_directory,
             path_from='bower_components/',
-            path_to=''
+            path_to='/static/'
         )
 
         # Static components of <polymer-app>/src
