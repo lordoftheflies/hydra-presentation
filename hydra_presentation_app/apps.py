@@ -9,7 +9,12 @@ class HydraPresentationAppConfig(PresentationAppConfig):
     name = 'hydra_presentation_app'
 
     def render(self, builder: polymer.ApplicationBuilder) -> polymer.ApplicationBuilder:
-        return builder
+        return builder \
+            .page() \
+            .set_route('view1') \
+            .set_name('my-view1') \
+            .set_path(static('src/my-view1.html')) \
+            .append()
             # .set_name('my-app')\
             # .set_title('My custom application')\
             # .set_path(static('src/my-app.html'))\

@@ -65,11 +65,6 @@ class PresentationAppConfig(AppConfig):
             .set_path(static('src/my-view404.html')) \
             .append() \
             .page() \
-            .set_route('view1') \
-            .set_name('my-view1') \
-            .set_path(static('src/my-view1.html')) \
-            .append() \
-            .page() \
             .set_route('view2') \
             .set_name('my-view2') \
             .set_path(static('src/my-view2.html')) \
