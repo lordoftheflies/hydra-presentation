@@ -6,14 +6,20 @@ logger = logging.getLogger(__name__)
 ELEMENT_ECMA_CLASS = 'window.Polymer.Element'
 
 
-class Resource:
+class Jsonable:
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+
+class Resource(Jsonable):
+    """
+    HTML5 resource, for example Javascript, CSS or HTML resources
+    """
 
     def __init__(self, path: str = None, lazy: bool = False) -> None:
         self.path = path
         self.lazy = lazy
-
-    def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
 class Tag(Resource):
@@ -38,6 +44,9 @@ class Tag(Resource):
 
 
 class Component(Tag):
+    """
+    Polymer based component
+    """
 
     def __init__(self, name: str, path: str = None, base=ELEMENT_ECMA_CLASS, lazy: bool = False, **kwargs) -> None:
         super(Component, self).__init__(name=name, path=path, lazy=lazy, **kwargs)
@@ -45,6 +54,9 @@ class Component(Tag):
 
 
 class Style(Resource):
+    """
+    Polymer style
+    """
 
     def __init__(self, name: str, path: str = None, lazy: bool = False):
         super().__init__(path=path, lazy=lazy)
@@ -55,6 +67,9 @@ class Style(Resource):
 
 
 class Mixin(Resource):
+    """
+    Polymer mixin
+    """
 
     def __init__(self, namespace: str, name: str, path: str):
         super().__init__(path=path, lazy=False)
@@ -77,6 +92,9 @@ class Mixin(Resource):
 
 
 class Module(Component):
+    """
+    Polymer om-module
+    """
 
     def __init__(self, name: str, path: str, components: list = [], mixins: list = [], styles: list = [],
                  lazy: bool = False,
@@ -94,6 +112,9 @@ class Module(Component):
 
 
 class Page(Module):
+    """
+    Page for a Polymer application
+    """
     TOKEN_SEPARATOR = '-'
 
     def __init__(self, name: str, path: str, title: str = None, components: list = [], **kwargs) -> None:
@@ -106,17 +127,47 @@ class Page(Module):
         return self.TOKEN_SEPARATOR.join(self.name.split(self.TOKEN_SEPARATOR)[1:])
 
 
-class Application(Module):
+class Menu(Jsonable):
 
-    def __init__(self, name: str, path: str, title: str = None, components: list = [], mixins: list = [],
-                 styles: list = [],
-                 lazy: bool = False, pages: dict = {},
-                 **kwargs) -> None:
+    def __init__(self, label, link, index, name=None, *submenus):
+        self.label = label
+        self.name = name if name is not None else link
+        self.link = link
+        self.index = index
+        self.submenus = submenus
+
+    def add_submenu(self, menu: 'Menu') -> 'Menu':
+        self.submenus.append(menu)
+        return menu
+
+    def link_to_page(self, page: Page):
+        self.link = page.route
+
+
+class Application(Module):
+    """
+    Shell for a Polymer application
+    """
+
+    def __init__(
+            self,
+            name: str,
+            path: str,
+            title: str = None,
+            components: list = [],
+            mixins: list = [],
+            styles: list = [],
+            lazy: bool = False,
+            pages: dict = {},
+            submenus=[],
+            **kwargs
+    ) -> None:
         super().__init__(name=name, path=path, components=components, styles=styles, lazy=lazy, mixins=mixins, **kwargs)
         self.title = title
         self.pages = pages
         self.lazy = lazy
         self.path = path
+        self.submenus = submenus
 
     def get_page(self, route: str):
         return self.pages[route]
@@ -343,7 +394,7 @@ class ApplicationBuilder(ComponentBuilder):
             self.base = ELEMENT_ECMA_CLASS
             self.path = None
             self.styles = []
-            print('uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu')
+            self.submenus = []
         else:
             self.title = application.title
             self.name = application.name
@@ -355,10 +406,7 @@ class ApplicationBuilder(ComponentBuilder):
             self.path = application.path
             self.attributes = application.attributes
             self.styles = application.styles
-            print('ooooooooooooooooooooooooooooooooooooooooooooooo')
-
-        print('------------------eeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
-        print(self.pages)
+            self.submenus = application.submenus
 
     def set_title(self, title: str) -> 'ApplicationBuilder':
         self.title = title
@@ -372,21 +420,34 @@ class ApplicationBuilder(ComponentBuilder):
 
     def add(self, route, page: Page):
         self.pages[route] = page
-
         return self
+
+    def menu(self) -> 'MenuBuilder':
+        return MenuBuilder(owner=self)
 
     def merge(self, updated_app: Application):
         current_app = self.application
         current_app.components = list(set(current_app.components + updated_app.components))
-        current_app.pages = {**current_app.pages, **updated_app.pages}
+        current_app.pages = {
+            **current_app.pages,
+            **updated_app.pages
+        }
         current_app.mixins = list(set(current_app.mixins + updated_app.mixins))
         current_app.lazy = updated_app.lazy
         current_app.base = updated_app.base
         current_app.path = updated_app.path
         current_app.title = updated_app.title
         current_app.name = updated_app.name
-        current_app.attributes = {**current_app.attributes, **updated_app.attributes}
+        current_app.attributes = {
+            **current_app.attributes,
+            **updated_app.attributes
+        }
         current_app.styles = list(set(current_app.styles + updated_app.styles))
+        current_app.submenus = sorted(
+            set(current_app.submenus + updated_app.submenus),
+            key=lambda menu: menu.index,
+            reverse=False
+        )
         return current_app
 
     def build(self) -> Application:
@@ -416,3 +477,50 @@ class ApplicationBuilder(ComponentBuilder):
                 styles=self.styles,
                 **self.attributes
             ))
+
+
+class MenuBuilder(Builder):
+
+    def __init__(self, owner):
+        super().__init__(owner=owner)
+        self.label = None
+        self.name = None
+        self.index = 0
+        self.link = None
+        self.submenus = []
+
+    def set_label(self, label: str) -> 'MenuBuilder':
+        self.label = label
+        return self
+
+    def set_name(self, name: str) -> 'MenuBuilder':
+        self.name = name
+        return self
+
+    def set_index(self, index: int) -> 'MenuBuilder':
+        self.index = index
+        return self
+
+    def set_link(self, link: str) -> 'MenuBuilder':
+        self.link = link
+        return self
+
+    def set_link_to_page(self, page: Page) -> 'MenuBuilder':
+        self.link = page.route
+        return self
+
+    def submenu(self):
+        return MenuBuilder(owner=self)
+
+    def append(self):
+        self.owner.submenus.append(self.build())
+        return super().append()
+
+    def build(self):
+        return Menu(
+            label=self.label,
+            name=self.name,
+            link=self.link,
+            index=self.index,
+            *self.submenus
+        )
