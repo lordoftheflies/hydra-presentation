@@ -63,21 +63,6 @@ class PresentationAppConfig(AppConfig):
             .set_route('view404') \
             .set_name('my-view404') \
             .set_path(static('src/my-view404.html')) \
-            .append() \
-            .page() \
-            .set_route('view2') \
-            .set_name('my-view2') \
-            .set_path(static('src/my-view2.html')) \
-            .append() \
-            .page() \
-            .set_route('view3') \
-            .set_name('my-view3') \
-            .set_path(static('src/my-view3.html')) \
-            .append() \
-            .page() \
-            .set_route('components-demo') \
-            .set_name('my-components-demo') \
-            .set_path(static('src/my-components-demo.html')) \
             .append()
 
     def ready(self):
