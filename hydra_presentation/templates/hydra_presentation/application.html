@@ -266,7 +266,9 @@ max-height: 50vh;
                     role="main">
                 {% endverbatim %}
                     {% for route, page in module.pages.items %}
-                    {% tag page %}
+                        {% autoescape off %}
+                            {% tag page %}
+                        {% endautoescape %}
                     {% endfor %}
                 {% verbatim %}
             </iron-pages>
